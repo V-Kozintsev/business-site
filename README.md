@@ -63,3 +63,9 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 php artisan key:generate - генерим ключ
 php artisan migrate - выполняем миграцию
 php artisan serve - запуск локального сервера
+
+### Команды для очистки ккеша
+
+php artisan route:clear
+php artisan config:clear
+php artisan view:clear
