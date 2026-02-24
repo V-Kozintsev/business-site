@@ -1,6 +1,7 @@
 <x-app-layout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="card border-0 shadow-lg mb-4 overflow-hidden">
-  <div class="card-body p-4" style="background: linear-gradient(135deg, #0d6efd, #6610f2);">
+    <div class="card-body p-4" style="background: linear-gradient(135deg, #0d6efd, #6610f2);">
     <div class="row align-items-center">
       <div class="col-md-8">
         <h2 class="text-white mb-1 fw-bold">
@@ -16,7 +17,8 @@
         </button>
       </div>
     </div>
-  </div>
+    </div>
+    </div>
 </div>
 
 
@@ -53,12 +55,12 @@
     </div>
 </div>
 
-
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Карточка таблицы с Grid -->
-    <div class="card shadow-lg border-0">
+        <div class="card shadow-lg border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
+                <table class="table table-bordered table-hover mb-0 align-middle">
                     <thead class="table-dark sticky-top">
                         <tr>
                             <th class="border-0 py-3 px-4 fw-bold text-white">👤 ФИО</th>
@@ -68,11 +70,12 @@
                             <th class="border-0 py-3 px-4 fw-bold text-white text-center">⚙️ Действия</th>
                         </tr>
                     </thead>
-                    <tbody id="reportsTableBody" class="table-group-divider">
+                    <tbody id="reportsTableBody">
                         <!-- JS заполнит -->
                     </tbody>
                 </table>
             </div>
+        </div>
         </div>
     </div>
 
@@ -94,20 +97,10 @@
             </div>
         </div>
     </div>
-    <style>
-.btn-outline-warning:hover { 
-  background: #ffc107 !important; color: #000 !important; transform: translateY(-1px); 
-}
-.btn-outline-danger:hover { 
-  background: #dc3545 !important; color: white !important; transform: translateY(-1px); 
-}
-.table-dark th { 
-  background: linear-gradient(90deg, #1e3a8a, #3b82f6) !important; 
-}
-</style>
+    
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     
     <script>
     $(document).ready(function() {
@@ -176,7 +169,7 @@
         data.forEach(report => {
             $('#reportsCount').text(data.length);
             tbody.append(`
-                <tr class="animate__animated animate__fadeIn">
+                <tr class="">
                     <td class="py-3 px-4">
                         <div class="d-flex align-items-center">
                             <div class="avatar avatar-sm me-3 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
@@ -223,42 +216,35 @@
 
 
 
-    function saveReport() {
+   function saveReport() {
     const reportId = $('#reportForm').data('report-id');
     const $form = $('#reportForm');
     
     if ($form[0].checkValidity()) {
         if (reportId) {
-            // UPDATE — твой код OK
+            // UPDATE
             $.ajax({
                 url: `/api/reports/${reportId}`,
                 method: 'PUT',
                 data: $form.serialize(),
                 success: function() {
-                    $('#reportModal').modal('hide');
+                    $('#reportModal').modal('hide');  // ← Закрытие
                     loadReports();
                     resetForm();
-                },
-                error: function() {
-                    alert('Ошибка обновления');
                 }
             });
         } else {
-            // CREATE — ИСПРАВЬ done()
+            // CREATE  
             $.post('/api/reports', $form.serialize())
                 .done(function() {
-                    $('#reportModal').modal('hide');
+                    $('#reportModal').modal('hide');  // ← ПРЯМО ЗДЕСЬ!
                     loadReports();
-                    resetForm();  // ← ДОБАВЬ ЭТО!
+                    resetForm();
                 })
-                .fail(function() {
-                    alert('Ошибка сохранения');
-                });
         }
-    } else {
-        alert('Заполните все поля');
     }
 }
+
 
 
 // ← ДОБАВЬ ЭТУ ФУНКЦИЮ
@@ -267,7 +253,13 @@ function resetForm() {
     $('#reportForm').removeData('report-id');
     $('.modal-title').text('Новый отчёт');
     $('.btn-primary[onclick="saveReport()"]').text('Сохранить');
+    
+    // ← ДОБАВЬ ЭТО
+    $('.modal-backdrop').remove();
+    $('body').removeClass('modal-open');
+    $('body').css('padding-right', '');
 }
+
 
     </script>
 </x-app-layout>
