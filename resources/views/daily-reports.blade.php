@@ -63,6 +63,7 @@
                 <table class="table table-bordered table-hover mb-0 align-middle">
                     <thead class="table-dark sticky-top">
                         <tr>
+                            <th class="border-0 py-3 px-4 fw-bold text-white">#</th> 
                             <th class="border-0 py-3 px-4 fw-bold text-white">👤 ФИО</th>
                             <th class="border-0 py-3 px-4 fw-bold text-white">📅 Дата</th>
                             <th class="border-0 py-3 px-4 fw-bold text-white">📍 Точка</th>
