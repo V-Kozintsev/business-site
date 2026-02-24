@@ -22,7 +22,7 @@
 </div>
 
 
-    <!-- МОДАЛКА REPORT (вставь СЮДА после </div> p-6) -->
+    
 <div class="modal fade" id="reportModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -102,6 +102,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
     
+    
     <script>
     $(document).ready(function() {
     // CSRF token для Ajax
@@ -154,64 +155,82 @@
 })
 
     function loadReports() {
-    $.get('/api/reports', function(data) {
-        const tbody = $('#reportsTableBody');
-        const emptyState = $('#emptyState');
-        
-        tbody.empty();
-        
-        if (data.length === 0) {
-            emptyState.show();
-            return;
-        }
-        emptyState.hide();
-        
-        data.forEach(report => {
-            $('#reportsCount').text(data.length);
-            tbody.append(`
-                <tr class="">
-                    <td class="py-3 px-4">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-sm me-3 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="bi bi-person fs-6"></i>
-                            </div>
-                            <div>
-                                <div class="fw-semibold">${report.employee_name || 'Неизвестно'}</div>
-                                <small class="text-muted">ID: ${report.id}</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <span class="badge bg-light text-dark">${new Date(report.report_date).toLocaleDateString('ru-RU')}</span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <i class="bi bi-geo-alt-fill text-primary me-2"></i>
-                        ${report.sales_point}
-                    </td>
-                    <td class="py-3 px-4 text-end fw-bold text-success fs-5">
-                        ${parseFloat(report.revenue).toLocaleString('ru-RU')} ₽
-                    </td>
-                    <td class="py-3 px-4 text-center">
-                        <div class="btn-group-vertical btn-group-sm d-flex justify-content-center" role="group">
-  <button class="btn btn-outline-warning btn-sm edit-btn shadow-sm mb-1 w-100" 
-          data-id="${report.id}" data-sales="${report.sales_point}" 
-          data-revenue="${report.revenue}" data-date="${report.report_date}"
-          title="Изменить">
-    <i class="bi bi-pencil"></i> Изменить
-  </button>
-  <button class="btn btn-outline-danger btn-sm delete-btn shadow-sm w-100" 
-          data-id="${report.id}" title="Удалить">
-    <i class="bi bi-trash"></i> Удалить
-  </button>
-</div>
-
-                    </td>
-                </tr>
-            `);
-        });
-    }).fail(function() {
-        console.log('API error');
+  $.get('/api/reports?all=true', function(data) {  // ← ВСЕ отчёты
+    const tbody = $('#reportsTableBody');
+    const emptyState = $('#emptyState');
+    
+    tbody.empty();
+    
+    if (data.length === 0) {
+      emptyState.show();
+      $('#reportsCount').text('0');
+      return;
+    }
+    emptyState.hide();
+    $('#reportsCount').text(data.length);
+    
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    
+    data.forEach((report, index) => {
+      const reportDate = new Date(report.report_date);
+      const isCurrentMonth = reportDate.getMonth() === currentMonth && reportDate.getFullYear() === currentYear;
+      
+      tbody.append(`
+        <tr class="">
+          <td class="fw-bold">${index + 1}</td>
+          <td class="py-3 px-4">
+            <div class="d-flex align-items-center">
+              <div class="avatar avatar-sm me-3 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
+                <i class="bi bi-person fs-6"></i>
+              </div>
+              <div>
+                <div class="fw-semibold">${report.employee_name || 'Неизвестно'}</div>
+                <small class="text-muted">ID: ${report.id}</small>
+              </div>
+            </div>
+          </td>
+          <td class="py-3 px-4">
+            <span class="badge ${isCurrentMonth ? 'bg-success' : 'bg-secondary'}">
+              ${new Date(report.report_date).toLocaleDateString('ru-RU')}
+            </span>
+          </td>
+          <td class="py-3 px-4">
+            <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+            ${report.sales_point}
+          </td>
+          <td class="py-3 px-4 text-end fw-bold text-success fs-5">
+            ${parseFloat(report.revenue).toLocaleString('ru-RU')} ₽
+          </td>
+          <td class="py-3 px-4 text-center">
+            ${isCurrentMonth ? `
+              <!-- ✅ ТЕКУЩИЙ МЕСЯЦ: EDIT + DELETE -->
+              <div class="btn-group-vertical btn-group-sm d-flex justify-content-center" role="group">
+                <button class="btn btn-outline-warning btn-sm edit-btn shadow-sm mb-1 w-100" 
+                        data-id="${report.id}" data-sales="${report.sales_point}" 
+                        data-revenue="${report.revenue}" data-date="${report.report_date}"
+                        title="Изменить">
+                  <i class="bi bi-pencil"></i> Изменить
+                </button>
+                <button class="btn btn-outline-danger btn-sm delete-btn shadow-sm w-100" 
+                        data-id="${report.id}" title="Удалить">
+                  <i class="bi bi-trash"></i> Удалить
+                </button>
+              </div>
+            ` : `
+              <!-- ❌ СТАРЫЕ: ТОЛЬКО ПРОСМОТР -->
+              <div class="text-muted">
+                <i class="bi bi-eye fs-5" title="Только просмотр"></i>
+                <div class="small mt-1">Архив</div>
+              </div>
+            `}
+          </td>
+        </tr>
+      `);
     });
+  }).fail(function() {
+    console.log('API error');
+  });
 }
 
 

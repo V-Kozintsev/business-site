@@ -9,22 +9,39 @@ use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
 {
-    $reports = DailyReport::where('employee_id', Auth::id())
-        ->whereMonth('report_date', now()->month)
-        ->leftJoin('users', 'daily_reports.employee_id', '=', 'users.id')
-        ->select(
-            'daily_reports.id',
-            'daily_reports.sales_point', 
-            'daily_reports.revenue', 
-            'daily_reports.report_date',
-            'users.name as employee_name'
-        )  // ← ТОЧНО ТАК!
-        ->orderBy('report_date', 'desc')
-        ->get();
+    if($request->has('all')) {
+        // ✅ ВСЕ отчёты менеджера (для архива)
+        $reports = DailyReport::where('employee_id', Auth::id())
+            ->leftJoin('users', 'daily_reports.employee_id', '=', 'users.id')
+            ->select(
+                'daily_reports.id',
+                'daily_reports.sales_point', 
+                'daily_reports.revenue', 
+                'daily_reports.report_date',
+                'users.name as employee_name'
+            )
+            ->orderBy('report_date', 'desc')
+            ->get();
+    } else {
+        // ❌ Текущая логика (только месяц)
+        $reports = DailyReport::where('employee_id', Auth::id())
+            ->whereMonth('report_date', now()->month)
+            ->leftJoin('users', 'daily_reports.employee_id', '=', 'users.id')
+            ->select(
+                'daily_reports.id',
+                'daily_reports.sales_point', 
+                'daily_reports.revenue', 
+                'daily_reports.report_date',
+                'users.name as employee_name'
+            )
+            ->orderBy('report_date', 'desc')
+            ->get();
+    }
     return response()->json($reports);
 }
+
 
     public function store(Request $request)
     {
