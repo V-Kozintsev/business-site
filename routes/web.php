@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Api\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,6 +30,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/news', function () {
         return view('news');
     })->middleware('role:admin');
+});
+
+Route::middleware(['auth', 'role:manager'])->prefix('api')->group(function () {
+    Route::get('/reports', [ReportController::class, 'index']);
+    Route::post('/reports', [ReportController::class, 'store']);
+    Route::put('reports/{report}', [ReportController::class, 'update']);
+    Route::delete('reports/{report}', [ReportController::class, 'destroy']);
 });
 
 require __DIR__.'/auth.php';

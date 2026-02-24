@@ -18,6 +18,7 @@
                                 <th>Дата</th>
                                 <th>Адрес точки</th>
                                 <th>Выручка</th>
+                                <th>Действия</th> 
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -63,39 +64,127 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
     $(document).ready(function() {
-        loadReports();
+    // CSRF token для Ajax
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
     });
+    loadReports();
+
+     $(document).on('click', '.edit-btn', function() {
+        const id = $(this).data('id');
+        const sales = $(this).data('sales');
+        const revenue = $(this).data('revenue');
+        const date = $(this).data('date');
+        
+        // Заполняем форму данными
+        $('#reportForm input[name="sales_point"]').val(sales);
+        $('#reportForm input[name="revenue"]').val(revenue);
+        $('#reportForm input[name="report_date"]').val(date);
+        
+        // Меняем кнопку на "Обновить"
+        $('.modal-title').text('Изменить отчёт');
+        $('.btn-primary[onclick="saveReport()"]').text('Обновить');
+        
+        // Сохраняем ID для update
+        $('#reportForm').data('report-id', id);
+        
+        // Показываем модал
+        new bootstrap.Modal(document.getElementById('reportModal')).show();
+    });
+    $(document).on('click', '.delete-btn', function() {
+        const id = $(this).data('id');
+        if (confirm('Удалить отчёт?')) {
+            $.ajax({
+                url: `/api/reports/${id}`,
+                method: 'DELETE',
+                success: function() {
+                    loadReports();
+                },
+                error: function() {
+                    alert('Ошибка удаления');
+                }
+            });
+        }
+    });
+})
 
     function loadReports() {
-        $.get('/api/reports', function(data) {
-            $('#reportsTable tbody').empty();
-            data.forEach(report => {
-                $('#reportsTable tbody').append(`
-                    <tr>
-                        <td>${report.report_date}</td>
-                        <td>${report.sales_point}</td>
-                        <td>${report.revenue} руб.</td>
-                    </tr>
-                `);
-            });
-        }).fail(function() {
-            console.log('API error');
+    $.get('/api/reports', function(data) {
+        $('#reportsTable tbody').empty();
+        data.forEach(report => {
+            $('#reportsTable tbody').append(`
+                <tr>
+                    <td>${report.report_date}</td>
+                    <td>${report.sales_point}</td>
+                    <td>${report.revenue} руб.</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning edit-btn" 
+                                data-id="${report.id}"
+                                data-sales="${report.sales_point}"
+                                data-revenue="${report.revenue}"
+                                data-date="${report.report_date}">
+                            Изменить
+                        </button>
+                         <button class="btn btn-sm btn-danger delete-btn me-1" data-id="${report.id}" style="background-color: #dc3545; color: white;">
+    Удалить
+</button>
+                    </td>
+                </tr>
+            `);
         });
-    }
+    }).fail(function() {
+        console.log('API error');
+    });
+}
+
 
     function saveReport() {
-        if ($('#reportForm')[0].checkValidity()) {
-            $.post('/api/reports', $('#reportForm').serialize())
+    const reportId = $('#reportForm').data('report-id');
+    const $form = $('#reportForm');
+    
+    if ($form[0].checkValidity()) {
+        if (reportId) {
+            // UPDATE — твой код OK
+            $.ajax({
+                url: `/api/reports/${reportId}`,
+                method: 'PUT',
+                data: $form.serialize(),
+                success: function() {
+                    $('#reportModal').modal('hide');
+                    loadReports();
+                    resetForm();
+                },
+                error: function() {
+                    alert('Ошибка обновления');
+                }
+            });
+        } else {
+            // CREATE — ИСПРАВЬ done()
+            $.post('/api/reports', $form.serialize())
                 .done(function() {
                     $('#reportModal').modal('hide');
                     loadReports();
+                    resetForm();  // ← ДОБАВЬ ЭТО!
                 })
                 .fail(function() {
                     alert('Ошибка сохранения');
                 });
-        } else {
-            alert('Заполните все поля');
         }
+    } else {
+        alert('Заполните все поля');
     }
+}
+
+
+// ← ДОБАВЬ ЭТУ ФУНКЦИЮ
+function resetForm() {
+    $('#reportForm')[0].reset();
+    $('#reportForm').removeData('report-id');
+    $('.modal-title').text('Новый отчёт');
+    $('.btn-primary[onclick="saveReport()"]').text('Сохранить');
+}
+
     </script>
 </x-app-layout>
