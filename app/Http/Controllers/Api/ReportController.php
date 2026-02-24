@@ -6,41 +6,46 @@ use App\Http\Controllers\Controller;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Spatie\Permission\Models\Role;
 class ReportController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
 {
-    if($request->has('all')) {
-        // ✅ ВСЕ отчёты менеджера (для архива)
-        $reports = DailyReport::where('employee_id', Auth::id())
-            ->leftJoin('users', 'daily_reports.employee_id', '=', 'users.id')
-            ->select(
-                'daily_reports.id',
-                'daily_reports.sales_point', 
-                'daily_reports.revenue', 
-                'daily_reports.report_date',
-                'users.name as employee_name'
-            )
-            ->orderBy('report_date', 'desc')
-            ->get();
-    } else {
-        // ❌ Текущая логика (только месяц)
-        $reports = DailyReport::where('employee_id', Auth::id())
-            ->whereMonth('report_date', now()->month)
-            ->leftJoin('users', 'daily_reports.employee_id', '=', 'users.id')
-            ->select(
-                'daily_reports.id',
-                'daily_reports.sales_point', 
-                'daily_reports.revenue', 
-                'daily_reports.report_date',
-                'users.name as employee_name'
-            )
-            ->orderBy('report_date', 'desc')
-            ->get();
+    $query = DailyReport::leftJoin('users', 'daily_reports.employee_id', '=', 'users.id')
+        ->select(
+            'daily_reports.id',
+            'daily_reports.sales_point', 
+            'daily_reports.revenue', 
+            'daily_reports.report_date',
+            'users.name as employee_name',
+            'daily_reports.employee_id'
+        );
+
+    if ($request->date_from) {
+        $query->where('daily_reports.report_date', '>=', $request->date_from);
     }
+    if ($request->date_to) {
+        $query->where('daily_reports.report_date', '<=', $request->date_to);
+    }
+
+    // ✅ БЕЗОПАСНАЯ проверка авторизации
+    if (Auth::check() && Auth::user()->hasRole('admin')) {
+        $reports = $query->orderBy('daily_reports.report_date', 'desc')->get();
+    } else {
+        $userId = Auth::check() ? Auth::id() : null;
+        if ($userId) {
+            $query->where('daily_reports.employee_id', $userId);
+            if (!$request->has('all')) {
+                $query->whereMonth('daily_reports.report_date', now()->month);
+            }
+        }
+        $reports = $query->orderBy('daily_reports.report_date', 'desc')->get();
+    }
+
     return response()->json($reports);
 }
+
+
 
 
     public function store(Request $request)
@@ -49,14 +54,10 @@ class ReportController extends Controller
             'sales_point' => 'required|string|max:255',
             'revenue' => 'required|numeric|min:0',
             'report_date' => 'required|date',
+            'employee_id' => 'required|exists:users,id',
         ]);
 
-        DailyReport::create([
-            'employee_id' => Auth::id(),
-            'sales_point' => $validated['sales_point'],
-            'revenue' => $validated['revenue'],
-            'report_date' => $validated['report_date'],
-        ]);
+        DailyReport::create($validated);
 
         return response()->json(['success' => true]);
     }
@@ -89,5 +90,6 @@ class ReportController extends Controller
         $report->delete();
         return response()->json(['success' => true]);
     }
+    
 
 }

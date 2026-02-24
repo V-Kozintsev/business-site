@@ -1,6 +1,13 @@
 <?php
+/* use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\NewsController;
+use App\Http\Controllers\Api\ReportController; */
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+/* Route::middleware('auth:sanctum')->group(function () {  // ← ИЗМЕНИ НА sanctum
+    // Новости для всех авторизованных
 
-// Пустой файл API routes
+    
+    // Отчёты только для менеджеров
+    Route::apiResource('reports', ReportController::class);
+    Route::apiResource('news', NewsController::class);
+}); */

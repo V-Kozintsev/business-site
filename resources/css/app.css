@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
