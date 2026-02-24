@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('daily_reports', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('role'); // admin or manager
+            $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
+            $table->string('sales_point'); // адрес точки
+            $table->decimal('revenue', 10, 2); // выручка
+            $table->date('report_date');
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employees');
+        Schema::dropIfExists('daily_reports');
     }
 };
