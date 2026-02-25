@@ -7,11 +7,11 @@
     <!-- Заголовок -->
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h1 class="display-5 fw-bold mb-0">📰 Новости компании</h1>
-        @if(auth()->check() && auth()->user()->is_admin)
-            <button class="btn btn-primary btn-lg shadow" data-bs-toggle="modal" data-bs-target="#newsModal">
-                <i class="bi bi-plus-circle me-2"></i>Новая новость
-            </button>
-        @endif
+        @if(auth()->check() && auth()->user()->hasRole('admin'))
+    <button class="btn btn-primary btn-lg shadow" data-bs-toggle="modal" data-bs-target="#newsModal">
+        <i class="bi bi-plus-circle me-2"></i>Новая новость
+    </button>
+@endif
     </div>
 
     <!-- Список новостей -->
@@ -200,6 +200,6 @@ $(document).on('click', '.delete-news', function() {
 });
 
 // Admin check
-window.isAdmin = {{ auth()->check() && auth()->user()->is_admin ? 'true' : 'false' }};
+window.isAdmin = {{ auth()->check() && auth()->user()->hasRole('admin') ? 'true' : 'false' }};
 </script>
 @endsection

@@ -1,47 +1,101 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+@extends('layouts.app')
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+@section('content')
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <!-- Hero Header -->
+            <div class="text-center mb-5">
+                <div class="display-4 fw-bold text-primary mb-3">
+                    <i class="bi bi-box-arrow-in-right me-3"></i>Вход
+                </div>
+                <p class="lead text-muted">Добро пожаловать обратно</p>
+            </div>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
+            <!-- Session Status -->
+            @if (session('status'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('status') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             @endif
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+            <!-- Form Card -->
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <form method="POST" action="{{ route('login') }}">
+                        @csrf
+
+                        <!-- Email -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-envelope me-2 text-primary"></i>{{ __('Email') }}
+                            </label>
+                            <input id="email" class="form-control form-control-lg @error('email') is-invalid @enderror" 
+                                   type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username">
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-lock me-2 text-primary"></i>{{ __('Пароль') }}
+                            </label>
+                            <input id="password" class="form-control form-control-lg @error('password') is-invalid @enderror" 
+                                   type="password" name="password" required autocomplete="current-password">
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember_me" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                                <label class="form-check-label fw-semibold" for="remember_me">
+                                    <i class="bi bi-clock me-2"></i>{{ __('Запомнить меня') }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow-lg">
+                                <i class="bi bi-door-open me-2"></i>{{ __('Войти') }}
+                            </button>
+                        </div>
+
+                        <!-- Forgot Password -->
+                        @if (Route::has('password.request'))
+                            <div class="text-center mt-4 pt-3 border-top">
+                                <a href="{{ route('password.request') }}" class="btn btn-link btn-lg p-0 text-decoration-none fw-semibold">
+                                    <i class="bi bi-key me-2"></i>{{ __('Забыли пароль?') }}
+                                </a>
+                            </div>
+                        @endif
+                    </form>
+                </div>
+            </div>
+
+            <!-- Register Link -->
+            <div class="text-center mt-4">
+                <p class="mb-0 text-muted">
+                    Нет аккаунта? 
+                    <a href="{{ route('register') }}" class="fw-bold text-primary text-decoration-none">
+                        <i class="bi bi-person-plus me-1"></i>Зарегистрироваться
+                    </a>
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    Безопасный вход • {{ config('app.name') }} © {{ date('Y') }}
+                </small>
+            </div>
         </div>
-    </form>
-</x-guest-layout>
+    </div>
+</div>
+@endsection
