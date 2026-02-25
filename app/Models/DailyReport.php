@@ -11,6 +11,7 @@ class DailyReport extends Model
 
     protected $fillable = [
         'employee_id',
+        'employee_name',
         'sales_point', 
         'revenue',
         'report_date'

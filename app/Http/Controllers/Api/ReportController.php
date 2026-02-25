@@ -11,35 +11,33 @@ class ReportController extends Controller
 {
    public function index(Request $request)
 {
-    $query = DailyReport::leftJoin('users', 'daily_reports.employee_id', '=', 'users.id')
-        ->select(
-            'daily_reports.id',
-            'daily_reports.sales_point', 
-            'daily_reports.revenue', 
-            'daily_reports.report_date',
-            'users.name as employee_name',
-            'daily_reports.employee_id'
-        );
+    $query = DailyReport::query()  // ❌ УБЕРИ leftJoin!
+        ->select([
+            'id', 'sales_point', 'revenue', 'report_date',
+            'employee_name', 'employee_id'
+        ]);
 
-    if ($request->date_from) {
-        $query->where('daily_reports.report_date', '>=', $request->date_from);
-    }
-    if ($request->date_to) {
-        $query->where('daily_reports.report_date', '<=', $request->date_to);
-    }
+    // Фильтры ✅
+    if ($request->date_from) $query->where('report_date', '>=', $request->date_from);
+    if ($request->date_to) $query->where('report_date', '<=', $request->date_to);
 
-    // ✅ БЕЗОПАСНАЯ проверка авторизации
-    if (Auth::check() && Auth::user()->hasRole('admin')) {
-        $reports = $query->orderBy('daily_reports.report_date', 'desc')->get();
+    if (Auth::user()?->hasRole('admin')) {
+        // Admin видит ВСЕ ✅
+        $reports = $query->orderBy('report_date', 'desc')->get();
     } else {
-        $userId = Auth::check() ? Auth::id() : null;
-        if ($userId) {
-            $query->where('daily_reports.employee_id', $userId);
-            if (!$request->has('all')) {
-                $query->whereMonth('daily_reports.report_date', now()->month);
-            }
+        $userId = Auth::id();
+        if (!$userId) {
+            return response()->json([], 401);  // ✅ Гость = пусто
         }
-        $reports = $query->orderBy('daily_reports.report_date', 'desc')->get();
+        
+        $query->where('employee_id', $userId);
+        
+        // ❌ ?all=true для менеджера = ошибка!
+        if (!$request->boolean('all')) {  // boolean() игнорирует фейковые параметры
+            $query->whereMonth('report_date', now()->month);
+        }
+        
+        $reports = $query->orderBy('report_date', 'desc')->get();
     }
 
     return response()->json($reports);
@@ -48,18 +46,26 @@ class ReportController extends Controller
 
 
 
+
+
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'sales_point' => 'required|string|max:255',
-            'revenue' => 'required|numeric|min:0',
-            'report_date' => 'required|date',
-            'employee_id' => 'required|exists:users,id',
+            'employee_name' => 'required|string|max:255',
+        'sales_point' => 'required|string|max:255',
+        'revenue' => 'required|numeric|min:0',
+        'report_date' => 'required|date',
+        'employee_id' => 'required|exists:users,id'
         ]);
 
-        DailyReport::create($validated);
+         \Log::info('Форма store(): ', $request->all());
+        \Log::info('Валидация store(): ', $validated);
 
-        return response()->json(['success' => true]);
+        $report = DailyReport::create($validated);
+
+
+
+         return response()->json(['success' => true, 'report' => $report]);
     }
     public function update(Request $request, DailyReport $report)
     {   
@@ -70,6 +76,7 @@ class ReportController extends Controller
             return response()->json(['error' => 'Только текущий месяц'], 403);
         }
         $validated = $request->validate([
+            'employee_name' => 'required|string|max:255',
             'sales_point' => 'required|string|max:255',
             'revenue' => 'required|numeric|min:0',
             'report_date' => 'required|date',

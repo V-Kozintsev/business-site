@@ -32,20 +32,32 @@
             </div>
             <div class="modal-body">
                 <form id="reportForm">
-                    <input type="hidden" name="employee_id" value="{{ Auth::id() }}">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">📍 Адрес точки продаж:</label>
-                        <input type="text" class="form-control" name="sales_point" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">💰 Выручка за день:</label>
-                        <input type="number" step="0.01" class="form-control" name="revenue" required min="0" max="99999999">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">📅 Дата:</label>
-                        <input type="date" class="form-control" name="report_date" required>
-                    </div>
-                </form>
+    @csrf
+    <input type="hidden" name="employee_id" value="{{ Auth::id() }}">
+
+    <!-- ✅ ФИО ВИДИМОЕ ПОЛЕ -->
+    <div class="mb-3">
+        <label class="form-label fw-bold">👤 ФИО менеджера:</label>
+        <input type="text" class="form-control" name="employee_name" 
+               value="{{ Auth::user()->name }}" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label fw-bold">📍 Адрес точки продаж:</label>
+        <input type="text" class="form-control" name="sales_point" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label fw-bold">💰 Выручка за день:</label>
+        <input type="number" step="0.01" class="form-control" name="revenue" required min="0">
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label fw-bold">📅 Дата:</label>
+        <input type="date" class="form-control" name="report_date" required>
+    </div>
+</form>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
@@ -128,10 +140,12 @@ $(document).ready(function() {
     // Edit handler
     $(document).on('click', '.edit-btn', function() {
         const id = $(this).data('id');
+        const name = $(this).data('name');
         const sales = $(this).data('sales');
         const revenue = $(this).data('revenue');
         const date = $(this).data('date');
         
+        $('#reportForm input[name="employee_name"]').val(name);
         $('#reportForm input[name="sales_point"]').val(sales);
         $('#reportForm input[name="revenue"]').val(revenue);
         $('#reportForm input[name="report_date"]').val(date);
@@ -162,7 +176,7 @@ $(document).ready(function() {
 });
 
 function loadReports() {
-    $.get('/api/reports?all=true')
+    $.get('/api/reports')
     .done(function(data) {
         const tbody = $('#reportsTableBody');
         const emptyState = $('#emptyState');
@@ -216,9 +230,12 @@ function loadReports() {
                         ${isCurrentMonth ? `
                             <div class="btn-group-vertical btn-group-sm d-flex justify-content-center gap-1" role="group">
                                 <button class="btn btn-outline-warning btn-sm edit-btn shadow-sm w-100" 
-                                        data-id="${report.id}" data-sales="${report.sales_point}" 
-                                        data-revenue="${report.revenue}" data-date="${report.report_date}">
-                                    <i class="bi bi-pencil"></i> Изменить
+                                  data-id="${report.id}" 
+                                  data-name="${report.employee_name}" 
+                                  data-sales="${report.sales_point}" 
+                                  data-revenue="${report.revenue}" 
+                                  data-date="${report.report_date}">
+                                  <i class="bi bi-pencil"></i> Изменить
                                 </button>
                                 <button class="btn btn-outline-danger btn-sm delete-btn shadow-sm w-100" 
                                         data-id="${report.id}">

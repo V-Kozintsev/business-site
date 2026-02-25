@@ -9,21 +9,21 @@
         <div class="navbar-nav ms-auto">
             @auth
                 <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="/dashboard">
-                    🏠 Главная
+                    Главная
                 </a>
                 <a class="nav-link {{ request()->is('daily-reports') ? 'active' : '' }}" href="/daily-reports">
-                    📊 Отчёты
+                    Отчёты
                 </a>
                 
                 {{-- ✅ НОВОСТИ ДЛЯ ВСЕХ --}}
                 <a class="nav-link {{ request()->is('news') ? 'active' : '' }}" href="/news">
-                    📰 Новости
+                    Новости
                 </a>
                 
                 {{-- ✅ АДМИН ТОЛЬКО --}}
                 @if (auth()->user()?->hasRole('admin'))
                     <a class="nav-link {{ request()->is('admin-reports') ? 'active' : '' }}" href="/admin-reports">
-                        👑 Админ
+                        Все отчёты
                     </a>
                 @endif
             @endauth
