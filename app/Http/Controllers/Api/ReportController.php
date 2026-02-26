@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 class ReportController extends Controller
 {
-   public function index(Request $request)
+ public function index(Request $request)
 {
     $query = DailyReport::query()
         ->select([
@@ -17,7 +17,12 @@ class ReportController extends Controller
             'employee_name', 'employee_id'
         ]);
 
-    // 🔥 ФИЛЬТРЫ ДАТАМИ — whereDate!
+    // 🔥 МЕНЕДЖЕР — ТОЛЬКО СВОИ!
+    if (!Auth::user()?->hasRole('admin')) {
+        $query->where('employee_id', Auth::id());
+    }
+
+    // Фильтры дат (работают для всех)
     if ($request->date_from) {
         $query->whereDate('report_date', '>=', $request->date_from);
     }
@@ -25,15 +30,10 @@ class ReportController extends Controller
         $query->whereDate('report_date', '<=', $request->date_to);
     }
 
-    if (Auth::user()?->hasRole('admin')) {
-        $reports = $query->orderBy('report_date', 'desc')->get();
-    } else {
-        // Manager логика...
-        $reports = $query->orderBy('report_date', 'desc')->get();
-    }
-
+    $reports = $query->orderBy('report_date', 'desc')->get();
     return response()->json($reports);
 }
+
 
 
 
