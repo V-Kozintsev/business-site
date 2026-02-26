@@ -5,7 +5,9 @@
 ```
 sudo apt update && sudo apt upgrade -y
 ```
-`sudo apt install php8.3 php8.3-cli php8.3-fpm php8.3-mysql php8.3-xml php8.3-mbstring php8.3-curl php8.3-zip unzip git curl mysql-server`
+```
+sudo apt install php8.3 php8.3-cli php8.3-fpm php8.3-mysql php8.3-xml php8.3-mbstring php8.3-curl php8.3-zip unzip git curl mysql-server
+```
 
 ###  Настройка MySQL
 
