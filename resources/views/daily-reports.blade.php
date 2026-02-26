@@ -116,16 +116,20 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+// 🔥 ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ — ПЕРВЫЕ!
+const CURRENT_USER_NAME = "{{ Auth::user()->name }}";
+const IS_ADMIN = {{ Auth::user()->hasRole('admin') ? 'true' : 'false' }};
+
 $(document).ready(function() {
- $('#reportModal').on('hidden.bs.modal', function () {
-    // Bootstrap уже очистил, но на всякий — финальная проверка
-    $('body').removeClass('modal-open');
-    $('body').removeAttr('style');
-    document.body.style.overflow = 'auto';
-    $('.modal-backdrop').remove();
-    console.log('Modal полностью закрыт — скролл восстановлен');
-});
-    // ✅ CSRF для всех Ajax
+    $('#reportModal').on('hidden.bs.modal', function () {
+        $('body').removeClass('modal-open');
+        $('body').removeAttr('style');
+        document.body.style.overflow = 'auto';
+        $('.modal-backdrop').remove();
+        console.log('Modal закрыт');
+    });
+
+    // CSRF для всех Ajax
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -133,10 +137,10 @@ $(document).ready(function() {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     });
-    
-    console.log('CSRF Token:', $('meta[name="csrf-token"]').attr('content'));
+
+    console.log('Admin:', IS_ADMIN, 'Name:', CURRENT_USER_NAME);
     loadReports();
-    
+
     // Edit handler
     $(document).on('click', '.edit-btn', function() {
         const id = $(this).data('id');
@@ -152,10 +156,9 @@ $(document).ready(function() {
         $('#reportForm').data('report-id', id);
         $('#modalTitle').text('✏️ Изменить отчёт');
         $('.btn-primary[onclick="saveReport()"]').html('<i class="bi bi-check-circle me-2"></i>Обновить');
-        
         $('#reportModal').modal('show');
     });
-    
+
     // Delete handler
     $(document).on('click', '.delete-btn', function() {
         const id = $(this).data('id');
@@ -172,7 +175,6 @@ $(document).ready(function() {
             });
         }
     });
-
 });
 
 function loadReports() {
@@ -197,6 +199,13 @@ function loadReports() {
         
         data.forEach((report, index) => {
             const reportDate = new Date(report.report_date);
+            
+            // ✅ Admin редактирует ВСЁ!
+            const isEditable = IS_ADMIN || 
+                (reportDate.getMonth() === currentMonth && 
+                 reportDate.getFullYear() === currentYear);
+            
+            // ✅ Бейдж для текущего месяца
             const isCurrentMonth = reportDate.getMonth() === currentMonth && 
                                  reportDate.getFullYear() === currentYear;
             
@@ -227,15 +236,15 @@ function loadReports() {
                         ${parseFloat(report.revenue).toLocaleString('ru-RU')} ₽
                     </td>
                     <td class="py-3 px-4 text-center">
-                        ${isCurrentMonth ? `
+                        ${isEditable ? `
                             <div class="btn-group-vertical btn-group-sm d-flex justify-content-center gap-1" role="group">
                                 <button class="btn btn-outline-warning btn-sm edit-btn shadow-sm w-100" 
-                                  data-id="${report.id}" 
-                                  data-name="${report.employee_name}" 
-                                  data-sales="${report.sales_point}" 
-                                  data-revenue="${report.revenue}" 
-                                  data-date="${report.report_date}">
-                                  <i class="bi bi-pencil"></i> Изменить
+                                        data-id="${report.id}" 
+                                        data-name="${report.employee_name}" 
+                                        data-sales="${report.sales_point}" 
+                                        data-revenue="${report.revenue}" 
+                                        data-date="${report.report_date}">
+                                    <i class="bi bi-pencil"></i> Изменить
                                 </button>
                                 <button class="btn btn-outline-danger btn-sm delete-btn shadow-sm w-100" 
                                         data-id="${report.id}">
@@ -276,6 +285,10 @@ function saveReport() {
     const formReset = function() {
         $form[0].reset();
         $form.removeData('report-id');
+        
+        // 🔥 ВОССТАВЛЯЕМ ФИО!
+        $('input[name="employee_name"]').val(CURRENT_USER_NAME);
+        
         $('#modalTitle').text('➕ Новый отчёт');
         $('.btn-primary[onclick="saveReport()"]').html('<i class="bi bi-check-circle me-2"></i>Сохранить');
     };
@@ -288,8 +301,12 @@ function saveReport() {
             data: $form.serialize(),
             success: function() {
                 formReset();
-                $('#reportModal').modal('hide');  // Только hide!
+                $('#reportModal').modal('hide');
                 loadReports();
+            },
+            error: (xhr) => {
+                console.error('Update error:', xhr);
+                alert('Ошибка обновления');
             }
         });
     } else {
@@ -297,11 +314,15 @@ function saveReport() {
         $.post('/api/reports', $form.serialize())
         .done(function() {
             formReset();
-            $('#reportModal').modal('hide');  // Только hide — без cleanupModal!
+            $('#reportModal').modal('hide');
             loadReports();
+        })
+        .fail((xhr) => {
+            console.error('Create error:', xhr);
+            alert('Ошибка создания');
         });
     }
 }
-
 </script>
+
 @endsection

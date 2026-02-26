@@ -16,7 +16,7 @@ class NewsController extends Controller
     
     public function store(Request $request)
     {
-        if (!Auth::user()->is_admin) {
+        if (!Auth::user()->hasRole('admin')) {
             return response()->json(['error' => 'Доступ запрещён'], 403);
         }
         
@@ -26,11 +26,11 @@ class NewsController extends Controller
         ]);
         
         $news = News::create($validated);
-        return response()->json($news);
+        return response()->json($news, 201);
     }
     public function update(Request $request, News $news)
 {
-    if (!Auth::user()->is_admin) {
+    if (!Auth::user()->hasRole('admin')) {
         return response()->json(['error' => 'Доступ запрещён'], 403);
     }
     $validated = $request->validate([
@@ -43,7 +43,7 @@ class NewsController extends Controller
 
 public function destroy(News $news)
 {
-    if (!Auth::user()->is_admin) {
+    if (!Auth::user()->hasRole('admin')) {
         return response()->json(['error' => 'Доступ запрещён'], 403);
     }
     $news->delete();

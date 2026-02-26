@@ -1,3 +1,5 @@
 protected $except = [
-    'api/*',  // ✅ Без CSRF
+    'api/reports',
+    'api/reports/*',
+    'api/news/*'
 ];
