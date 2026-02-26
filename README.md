@@ -1,71 +1,102 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+### Подробная инструкция по запуску проекта
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+### Установка зависимостей PHP
 
-## About Laravel
+sudo apt update && sudo apt upgrade -y
+sudo apt install php8.3 php8.3-cli php8.3-fpm php8.3-mysql php8.3-xml php8.3-mbstring php8.3-curl php8.3-zip unzip git curl mysql-server
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+###  Настройка MySQL
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+sudo service mysql start
+sudo mysql_secure_installation
+# Выберите: No для password validation, Y для всех остальных
+# Запомните пароль root!
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+### Создание базы данных и пользователя
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+sudo mysql
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+CREATE DATABASE business_site1;
+CREATE USER 'laravel_user'@'localhost' IDENTIFIED BY 'password123';
+GRANT ALL PRIVILEGES ON business_site1.* TO 'laravel_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
 
-## Laravel Sponsors
+### Установка Composer(если требуется)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm install --lts
+node --version && npm --version
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
-### Premium Partners
+## Клонирование и настройка проекта
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+git clone https://github.com/V-Kozintsev/business-site.git
+cd business-site
+cp .env.example .env
 
-## Contributing
+## Настройка .env
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+nano .env
+Измените:
+DB_USERNAME=laravel_user
+DB_PASSWORD=password123
+DB_DATABASE=business_site1
 
-## Code of Conduct
+### Установка зависимостей и запуск
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# PHP зависимости
+composer install --optimize-autoloader --no-dev
 
-## Security Vulnerabilities
+# Ключ приложения
+php artisan key:generate
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# База данных - МИГРАЦИИ
+php artisan migrate
 
-## License
+# **СИДЕРЫ - ТЕСТОВЫЕ ДАННЫЕ**
+php artisan db:seed
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Символьные ссылки
+php artisan storage:link
 
-### Запуск проекта
-
-php artisan key:generate - генерим ключ
-php artisan migrate - выполняем миграцию
-php artisan serve - запуск локального сервера
-
-### Команды для очистки ккеша
-
-php artisan route:clear
+# Очистка кеша
 php artisan config:clear
-php artisan view:clear
+php artisan cache:clear
+
+# JS/CSS зависимости
+npm install
+npm run dev
+
+# Запуск сервера
+php artisan serve --host=0.0.0.0 --port=8000
+
+## Доступ к проекту:
+http://127.0.0.1:8000/dashboard
+
+
+### Полезные команды
+php artisan migrate:fresh --seed     # Очистить БД + миграции + сидеры
+php artisan serve                    # Запуск dev сервера
+npm run dev                          # Сборка CSS/JS (watch)
+npm run build                        # Сборка для продакшена
+php artisan cache:clear              # Очистка кеша
+php artisan db:seed                  # Запуск сидеров
+
+
+# MySQL не запускается
+sudo service mysql restart
+
+# Права на storage
+chmod -R 775 storage bootstrap/cache
+
+# Node.js не найден  
+nvm use --lts
+
+# Перезапуск nvm после перезагрузки WSL
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
