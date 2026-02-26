@@ -23,14 +23,20 @@
                     <input type="date" id="dateTo" class="form-control">
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
-                    <button onclick="loadAdminReports()" class="btn btn-primary w-100">
-                        <i class="bi bi-arrow-clockwise me-2"></i>Обновить
-                    </button>
+                    <div class="col-md-4 d-flex gap-2 align-items-end">
+    <button onclick="loadAdminReports()" class="btn btn-primary flex-fill">
+        <i class="bi bi-arrow-clockwise me-2"></i>Обновить
+    </button>
+    <button onclick="clearFilters()" class="btn btn-outline-secondary flex-fill">
+        <i class="bi bi-arrow-repeat me-2"></i>Сбросить
+    </button>
+</div>
+
                 </div>
             </div>
         </div>
     </div>
-
+    
     <!-- ТАБЛИЦА -->
     <div class="card shadow-lg">
         <div class="card-header bg-white border-0 py-3">
@@ -79,52 +85,62 @@ $(document).ready(function() {
 function loadAdminReports() {
     const from = $('#dateFrom').val();
     const to = $('#dateTo').val();
-    let url = '/api/reports';
+    let url = '/api/reports?all=true';
     
     if (from || to) {
-        url += '?';
-        if (from) url += 'date_from=' + from + '&';
-        if (to) url += 'date_to=' + to;
-        url = url.slice(0, -1);
+        url += `&date_from=${from}&date_to=${to}`;
     }
-
-    $.get(url, function(data) {
-        const tbody = $('#adminReportsTable');
-        let totalRevenue = 0;
-        
-        tbody.empty();
-        data.forEach(report => {
-            totalRevenue += parseFloat(report.revenue) || 0;
+    
+    console.log('Admin URL:', url);
+    
+    $.get(url)
+        .done(function(data) {
+            console.log('Admin count:', data.length);
+            
+            const tbody = $('#adminReportsTable');
+            let totalRevenue = 0;
+            tbody.empty();
+            
+            if (data.length === 0) {
+                tbody.html('<tr><td colspan="4" class="text-center py-4 text-muted">Нет отчётов за период</td></tr>');
+                $('#monthTotal').text('0 ₽');
+                return;
+            }
+            
+            data.forEach(report => {
+                const revenueNum = parseFloat(report.revenue) || 0;  // ✅ Без NaN
+                totalRevenue += revenueNum;
+                
+                const row = `
+                    <tr>
+                        <td>${report.employee_name || 'N/A'}</td>
+                        <td>${new Date(report.report_date).toLocaleDateString('ru-RU')}</td>
+                        <td>${report.sales_point || 'N/A'}</td>
+                        <td class="text-end fw-bold">${report.revenue}₽</td>
+                    </tr>`;
+                tbody.append(row);
+            });
+            
+            // ИТОГО в таблице
             tbody.append(`
-                <tr>
-                    <td>${report.employee_name || 'Неизвестно'}</td>
-                    <td>${report.report_date}</td>
-                    <td>${report.sales_point}</td>
-                    <td class="text-end fw-bold text-success fs-5">${report.revenue.toLocaleString()} ₽</td>
-                </tr>
-            `);
+                <tr class="table-success fw-bold">
+                    <td colspan="3" class="text-end">ИТОГО:</td>
+                    <td class="text-end">${totalRevenue.toLocaleString('ru-RU')} ₽</td>
+                </tr>`);
+            
+            // Обнови карточку месяц
+            $('#monthTotal').text(totalRevenue.toLocaleString('ru-RU') + ' ₽');
+        })
+        .fail(function(xhr) {
+            console.error('API Error:', xhr);
+            $('#adminReportsTable').html('<tr><td colspan="4" class="text-center py-4 text-danger">Ошибка API</td></tr>');
         });
-        
-        // Итог
-        tbody.append(`
-            <tr class="table-info fw-bold">
-                <td colspan="3" class="text-end">Итого:</td>
-                <td class="text-end fs-4">${totalRevenue.toLocaleString()} ₽</td>
-            </tr>
-        `);
-        
-        // Месяц
-        const now = new Date();
-        const monthReports = data.filter(r => {
-            const date = new Date(r.report_date);
-            return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-        });
-        const monthTotal = monthReports.reduce((sum, r) => sum + parseFloat(r.revenue || 0), 0);
-        $('#monthTotal').text(monthTotal.toLocaleString() + ' ₽');
-        
-    }).fail(function() {
-        $('#adminReportsTable').html('<tr><td colspan="4" class="text-center py-4 text-danger">Ошибка загрузки</td></tr>');
-    });
+}
+
+function clearFilters() {
+    $('#dateFrom, #dateTo').val('');
+    loadAdminReports();
 }
 </script>
+
 @endsection
