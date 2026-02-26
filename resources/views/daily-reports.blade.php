@@ -71,6 +71,26 @@
 
 <!-- ТАБЛИЦА -->
 <div class="container py-5">
+    <div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <label class="form-label fw-bold">📅 С даты:</label>
+        <input type="date" id="dateFrom" class="form-control" value="2026-02-01">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-bold">По дату:</label>
+        <input type="date" id="dateTo" class="form-control" value="2026-02-25">
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-primary w-100" onclick="loadReports()">
+            <i class="bi bi-search me-2"></i>Фильтровать
+        </button>
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+            <i class="bi bi-arrow-clockwise me-2"></i>Сбросить
+        </button>
+    </div>
+</div>
     <div class="card shadow-lg border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -176,9 +196,20 @@ $(document).ready(function() {
         }
     });
 });
-
+function clearFilters() {
+    $('#dateFrom, #dateTo').val('');
+    loadReports();
+}
 function loadReports() {
-    $.get('/api/reports')
+    const dateFrom = $('#dateFrom').val();
+    const dateTo = $('#dateTo').val();
+    let url = '/api/reports';
+    if (dateFrom || dateTo) {
+        url += '?';
+        if (dateFrom) url += `date_from=${dateFrom}&`;
+        if (dateTo) url += `date_to=${dateTo}`;
+    }
+    $.get(url)
     .done(function(data) {
         const tbody = $('#reportsTableBody');
         const emptyState = $('#emptyState');

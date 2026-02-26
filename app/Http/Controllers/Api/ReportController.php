@@ -11,32 +11,24 @@ class ReportController extends Controller
 {
    public function index(Request $request)
 {
-    $query = DailyReport::query()  // ❌ УБЕРИ leftJoin!
+    $query = DailyReport::query()
         ->select([
             'id', 'sales_point', 'revenue', 'report_date',
             'employee_name', 'employee_id'
         ]);
 
-    // Фильтры ✅
-    if ($request->date_from) $query->where('report_date', '>=', $request->date_from);
-    if ($request->date_to) $query->where('report_date', '<=', $request->date_to);
+    // 🔥 ФИЛЬТРЫ ДАТАМИ — whereDate!
+    if ($request->date_from) {
+        $query->whereDate('report_date', '>=', $request->date_from);
+    }
+    if ($request->date_to) {
+        $query->whereDate('report_date', '<=', $request->date_to);
+    }
 
     if (Auth::user()?->hasRole('admin')) {
-        // Admin видит ВСЕ ✅
         $reports = $query->orderBy('report_date', 'desc')->get();
     } else {
-        $userId = Auth::id();
-        if (!$userId) {
-            return response()->json([], 401);  
-        }
-        
-        $query->where('employee_id', $userId);
-        
-        // ❌ ?all=true для менеджера = ошибка!
-        if (!$request->boolean('all')) {  // boolean() игнорирует фейковые параметры
-            $query->whereMonth('report_date', now()->month);
-        }
-        
+        // Manager логика...
         $reports = $query->orderBy('report_date', 'desc')->get();
     }
 
