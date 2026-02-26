@@ -160,7 +160,8 @@ http://127.0.0.1:8000/dashboard
 
 
 ### Полезные команды
-php artisan migrate:fresh --seed     # Очистить БД + миграции + сидеры
+php artisan migrate:fresh --seed     #Очистить БД + миграции + сидеры
+
 php artisan serve                    # Запуск dev сервера
 npm run dev                          # Сборка CSS/JS (watch)
 npm run build                        # Сборка для продакшена
