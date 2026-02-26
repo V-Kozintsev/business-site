@@ -160,25 +160,37 @@ http://127.0.0.1:8000/dashboard
 
 
 ### Полезные команды
-php artisan migrate:fresh --seed     #Очистить БД + миграции + сидеры
+php artisan migrate:fresh --seed - Очистить БД + миграции + сидеры
 
-php artisan serve                    # Запуск dev сервера
-npm run dev                          # Сборка CSS/JS (watch)
-npm run build                        # Сборка для продакшена
-php artisan cache:clear              # Очистка кеша
-php artisan db:seed                  # Запуск сидеров
+php artisan serve - Запуск dev сервера
+npm run dev - Сборка CSS/JS (watch)
+npm run build   - Сборка для продакшена
+php artisan cache:clear -  Очистка кеша
+php artisan db:seed   - Запуск сидеров
 
 
 # MySQL не запускается
+
+```
 sudo service mysql restart
+```
 
 # Права на storage
+
+```
 chmod -R 775 storage bootstrap/cache
+```
 
 # Node.js не найден  
+```
 nvm use --lts
+```
 
 # Перезапуск nvm после перезагрузки WSL
+```
 export NVM_DIR="$HOME/.nvm"
+```
+```
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+```
 
