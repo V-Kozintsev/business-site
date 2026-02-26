@@ -11,10 +11,14 @@ sudo apt install php8.3 php8.3-cli php8.3-fpm php8.3-mysql php8.3-xml php8.3-mbs
 
 ###  Настройка MySQL
 
+```
 sudo service mysql start
+```
+```
 sudo mysql_secure_installation
-# Выберите: No для password validation, Y для всех остальных
-# Запомните пароль root!
+```
+- Выберите: No для password validation, Y для всех остальных
+## Запомните пароль root!
 
 
 ### Создание базы данных и пользователя
