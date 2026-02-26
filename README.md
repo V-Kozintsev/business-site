@@ -44,21 +44,25 @@ EXIT;
 ### Установка Composer(если требуется)
 
 ```
-
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 ```
 
 ```
 source ~/.bashrc
 ```
+
+```
 export NVM_DIR="$HOME/.nvm"
 ```
+
 ```
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 ```
+
 ```
 nvm install --lts
 ```
+
 ```
 node --version && npm --version
 ```
@@ -69,9 +73,11 @@ node --version && npm --version
 ```
 git clone https://github.com/V-Kozintsev/business-site.git
 ```
+
 ```
 cd business-site
 ```
+
 ```
 cp .env.example .env
 ```
@@ -91,52 +97,63 @@ DB_DATABASE=business_site1
 ### Установка зависимостей и запуск
 
 # PHP зависимости
+
 ```
 composer install --optimize-autoloader --no-dev
 ```
 
 # Ключ приложения
+
 ```
 php artisan key:generate
 ```
 
 # База данных - МИГРАЦИИ
+
 ```
 php artisan migrate
 ```
 
 # **СИДЕРЫ - ТЕСТОВЫЕ ДАННЫЕ**
+
 ```
 php artisan db:seed
 ```
 
 # Символьные ссылки
+
 ```
 php artisan storage:link
 ```
 
 # Очистка кеша
+
 ```
 php artisan config:clear
 ```
+
 ```
 php artisan cache:clear
 ```
 
 # JS/CSS зависимости
+
 ```
 npm install
 ```
+
 ```
 npm run dev
 ```
 
 # Запуск сервера
+
 ```
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
 ## Доступ к проекту:
+
 ```
 http://127.0.0.1:8000/dashboard
 ```
