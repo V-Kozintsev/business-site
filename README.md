@@ -19,7 +19,7 @@ sudo mysql_secure_installation
 ```
 - Выберите: No для password validation, Y для всех остальных
 
-### Создание базы данных и пользователя
+### 1.Создание базы данных и пользователя
 
 ```
 sudo mysql
@@ -41,7 +41,7 @@ FLUSH PRIVILEGES;
 EXIT;
 ```
 
-### Установка Composer(если требуется)
+### 2.Установка Composer(если требуется)
 
 ```
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -68,7 +68,7 @@ node --version && npm --version
 ```
 
 
-## Клонирование и настройка проекта
+## 3.Клонирование и настройка проекта
 
 ```
 git clone https://github.com/V-Kozintsev/business-site.git
@@ -82,7 +82,7 @@ cd business-site
 cp .env.example .env
 ```
 
-## Настройка .env
+## 4.Настройка .env
 
 ```
 nano .env
@@ -94,7 +94,7 @@ DB_PASSWORD=password123
 DB_DATABASE=business_site1
 ```
 
-### Установка зависимостей и запуск
+### 5.Установка зависимостей и запуск
 
 # PHP зависимости
 
@@ -102,31 +102,31 @@ DB_DATABASE=business_site1
 composer install --optimize-autoloader --no-dev
 ```
 
-# Ключ приложения
+# 6.Ключ приложения
 
 ```
 php artisan key:generate
 ```
 
-# База данных - МИГРАЦИИ
+# 7.База данных - МИГРАЦИИ
 
 ```
 php artisan migrate
 ```
 
-# **СИДЕРЫ - ТЕСТОВЫЕ ДАННЫЕ**
+# 8.**СИДЕРЫ - ТЕСТОВЫЕ ДАННЫЕ**
 
 ```
 php artisan db:seed
 ```
 
-# Символьные ссылки
+# 9.Символьные ссылки
 
 ```
 php artisan storage:link
 ```
 
-# Очистка кеша
+# 10.Очистка кеша
 
 ```
 php artisan config:clear
@@ -136,7 +136,7 @@ php artisan config:clear
 php artisan cache:clear
 ```
 
-# JS/CSS зависимости
+# 11.JS/CSS зависимости
 
 ```
 npm install
@@ -146,13 +146,13 @@ npm install
 npm run dev
 ```
 
-# Запуск сервера
+# 12.Запуск сервера
 
 ```
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-## Данные входа через учетку ажмина
+## 13.Данные входа через учетку админа
 
 - логин- `admin@test.com`
 - пароль - `password`
