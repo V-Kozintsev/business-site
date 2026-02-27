@@ -152,6 +152,11 @@ npm run dev
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
+## Данные входа через учетку ажмина
+
+- логин- `admin@test@com`
+- пароль - `password`
+
 ## Доступ к проекту:
 
 ```
